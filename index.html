@@ -9,16 +9,16 @@
 <body>
   <header class="app-header">
     <div>
-      <p class="eyebrow">Template fuer Debattenberichte</p>
+      <p class="eyebrow">Template für Debattenberichte</p>
       <h1>Debattenbericht-Generator</h1>
       <p class="intro">
         Erfasst Titel, Lead, Berichtsteile, Bilder und Zitat in einer Eingabemaske mit Sofortfeedback.
-        Das Layout orientiert sich an der gelieferten Vorlage und laesst sich als echtes DOCX-Dokument exportieren.
+        Das Layout orientiert sich an der gelieferten Vorlage und lässt sich als echtes DOCX-Dokument exportieren.
       </p>
     </div>
     <div class="header-actions">
       <button id="sampleButton" type="button" class="ghost-button">Beispieldaten laden</button>
-      <button id="resetButton" type="button" class="ghost-button">Zuruecksetzen</button>
+      <button id="resetButton" type="button" class="ghost-button">Zurücksetzen</button>
       <button id="exportButton" type="button" class="primary-button">DOCX exportieren</button>
     </div>
   </header>
@@ -27,7 +27,7 @@
     <section class="panel editor-panel">
       <div class="panel-head">
         <h2>Redaktionsmaske</h2>
-        <p>Alle Textfelder haben Browser-Rechtschreibpruefung aktiviert. Das Feedback prueft Form, Satzlaenge und Aktivstil.</p>
+        <p>Alle Textfelder haben Browser-Rechtschreibprüfung aktiviert. Das Feedback prüft Form, Satzlänge und Aktivstil.</p>
       </div>
 
       <section class="language-tool-panel">
@@ -36,9 +36,9 @@
             <h3>LanguageTool</h3>
             <p id="languageToolConfigLine" class="hint">Server: wird geladen</p>
           </div>
-          <button id="languageToolCheckButton" type="button" class="ghost-button">Text pruefen</button>
+          <button id="languageToolCheckButton" type="button" class="ghost-button">Text prüfen</button>
         </div>
-        <p id="languageToolStatus" class="hint">Noch keine LanguageTool-Pruefung ausgefuehrt.</p>
+        <p id="languageToolStatus" class="hint">Noch keine LanguageTool-Prüfung ausgeführt.</p>
         <div id="languageToolSummary" class="feedback"></div>
         <div id="languageToolResults" class="language-tool-results"></div>
       </section>
@@ -59,10 +59,10 @@
               id="debateTheme"
               name="debateTheme"
               type="text"
-              placeholder="z. B. Impfpflicht fuer Basisimpfungen"
+              placeholder="z. B. Impfpflicht für Basisimpfungen"
               spellcheck="true"
             >
-            <small class="hint">Hilfsfeld fuer die Untertitel-Pruefung.</small>
+            <small class="hint">Hilfsfeld für die Untertitel-Prüfung.</small>
           </label>
 
           <label class="control">
@@ -74,7 +74,7 @@
               placeholder="Leonie, Anne, Nicolas, Michelle"
               spellcheck="true"
             >
-            <small class="hint">Wird genutzt, um zu pruefen, ob der Untertitel die Vornamen aufnimmt.</small>
+            <small class="hint">Wird genutzt, um zu prüfen, ob der Untertitel die Vornamen aufnimmt.</small>
           </label>
 
           <label class="control">
@@ -86,7 +86,7 @@
               placeholder="Vorname Nachname, Vorname Nachname"
               spellcheck="true"
             >
-            <small class="hint">Dient zugleich als Bildlegende fuer das Autorenbild.</small>
+            <small class="hint">Dient zugleich als Bildlegende für das Autorenbild.</small>
             <div class="feedback" data-feedback-for="authorNames"></div>
           </label>
         </fieldset>
@@ -143,7 +143,7 @@
               id="blockOne"
               name="blockOne"
               rows="12"
-              placeholder="Einfuehrungsreden und freie Aussprache, rund 3000 Zeichen"
+              placeholder="Einführungsreden und freie Aussprache, rund 3000 Zeichen"
               spellcheck="true"
             ></textarea>
             <small class="hint">Maximal 3000 Zeichen inklusive Leerzeichen.</small>
@@ -170,7 +170,7 @@
           <label class="control upload-control">
             <span>Debattenbild hochladen</span>
             <input id="debateImage" name="debateImage" type="file" accept="image/png,image/jpeg">
-            <small class="hint">Wird in der Endversion grossflaechig eingebaut. Fuer den DOCX-Export bitte PNG oder JPG verwenden.</small>
+            <small class="hint">Wird in der Endversion grossflächig eingebaut. Für den DOCX-Export bitte PNG oder JPG verwenden.</small>
           </label>
 
           <label class="control">
@@ -189,7 +189,7 @@
           <label class="control upload-control">
             <span>Autorenbild hochladen</span>
             <input id="authorImage" name="authorImage" type="file" accept="image/png,image/jpeg">
-            <small class="hint">Das Autorenbild wird mit den Autor*innennamen beschriftet. Fuer den DOCX-Export bitte PNG oder JPG verwenden.</small>
+            <small class="hint">Das Autorenbild wird mit den Autor*innennamen beschriftet. Für den DOCX-Export bitte PNG oder JPG verwenden.</small>
           </label>
 
           <label class="control">
@@ -198,10 +198,10 @@
               id="quoteText"
               name="quoteText"
               rows="4"
-              placeholder="Praegnantes Zitat aus der Debatte"
+              placeholder="Prägnantes Zitat aus der Debatte"
               spellcheck="true"
             ></textarea>
-            <small class="hint">Kurz und zugkraeftig formulieren.</small>
+            <small class="hint">Kurz und zugkräftig formulieren.</small>
             <div class="feedback" data-feedback-for="quoteText"></div>
           </label>
 
@@ -224,7 +224,7 @@
     <section class="panel preview-panel">
       <div class="panel-head">
         <h2>Live-Vorschau</h2>
-        <p>Die Vorschau uebernimmt das Zeitungsraster der Screenshots in einer druckbaren A4-Komposition.</p>
+        <p>Die Vorschau übernimmt das Zeitungsraster der Screenshots in einer druckbaren A4-Komposition.</p>
       </div>
 
       <section class="readiness-card">
@@ -267,7 +267,7 @@
 
           <div class="lead-column">
             <p class="lead-text" id="previewLead">
-              Zugkraeftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.
+              Zugkräftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.
             </p>
 
             <div class="meta-strip">

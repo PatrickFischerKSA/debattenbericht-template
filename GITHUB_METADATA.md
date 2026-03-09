@@ -4,10 +4,10 @@
 `debattenbericht-template`
 
 ## Kurzbeschreibung (Description)
-Browserbasiertes Template fuer Debattenberichte mit Live-Validierung, Bild-Uploads und echtem DOCX-Export im Zeitungsstil.
+Browserbasiertes Template für Debattenberichte mit Live-Validierung, Bild-Uploads und echtem DOCX-Export im Zeitungsstil.
 
-## About (laengere Variante)
-Eine statische Redaktions-App fuer schulische Debattenberichte. Enthält Eingabemasken fuer Titel, Untertitel, Lead, zwei Berichtsbloecke, Bilder, Zitat und Autor*innenangaben. Prueft formale Kriterien direkt beim Schreiben, zeigt eine drucknahe Vorschau und exportiert den fertigen Bericht als echte DOCX-Datei.
+## About (längere Variante)
+Eine statische Redaktions-App für schulische Debattenberichte. Enthält Eingabemasken für Titel, Untertitel, Lead, zwei Berichtsblöcke, Bilder, Zitat und Autor*innenangaben. Prüft formale Kriterien direkt beim Schreiben, zeigt eine drucknahe Vorschau und exportiert den fertigen Bericht als echte DOCX-Datei.
 
 ## Topics (Vorschlag)
 - deutschunterricht
@@ -22,4 +22,4 @@ Eine statische Redaktions-App fuer schulische Debattenberichte. Enthält Eingabe
 - newsroom
 
 ## Sichtbarkeit
-Fuer Unterrichts- und Redaktionsprojekte in der Regel: `Public`
+Für Unterrichts- und Redaktionsprojekte in der Regel: `Public`

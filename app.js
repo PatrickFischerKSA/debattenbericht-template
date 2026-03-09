@@ -269,13 +269,13 @@ function getLanguageToolFeedback(field) {
 
   if (!result.matches.length) {
     return {
-      lines: [feedbackLine("ok", "LanguageTool: keine Treffer in der letzten Pruefung.")],
+      lines: [feedbackLine("ok", "LanguageTool: keine Treffer in der letzten Prüfung.")],
       level: null
     };
   }
 
   return {
-    lines: [feedbackLine("warn", `LanguageTool: ${result.matches.length} Treffer. Details in der Pruefliste.`)],
+    lines: [feedbackLine("warn", `LanguageTool: ${result.matches.length} Treffer. Details in der Prüfliste.`)],
     level: "warn"
   };
 }
@@ -305,7 +305,7 @@ function normalizeLanguageToolMatches(fieldName, text, matches) {
 
 function describeLanguageToolError(error) {
   if (!error) {
-    return "Unbekannter Fehler bei der LanguageTool-Pruefung.";
+    return "Unbekannter Fehler bei der LanguageTool-Prüfung.";
   }
   if (error.message) {
     return error.message;
@@ -343,13 +343,13 @@ function renderLanguageToolPanel() {
   }
 
   if (languageToolState.running) {
-    languageToolStatus.textContent = "LanguageTool prueft die Texte ...";
+    languageToolStatus.textContent = "LanguageTool prüft die Texte ...";
   } else if (languageToolState.globalError) {
     languageToolStatus.textContent = `LanguageTool-Fehler: ${languageToolState.globalError}`;
   } else if (languageToolState.lastCheckedAt) {
-    languageToolStatus.textContent = `Letzte Pruefung: ${languageToolState.lastCheckedAt}`;
+    languageToolStatus.textContent = `Letzte Prüfung: ${languageToolState.lastCheckedAt}`;
   } else {
-    languageToolStatus.textContent = "Noch keine LanguageTool-Pruefung ausgefuehrt.";
+    languageToolStatus.textContent = "Noch keine LanguageTool-Prüfung ausgeführt.";
   }
 
   const checkedFields = Object.values(languageToolState.resultsByField).filter((entry) => entry.status === "ready");
@@ -367,15 +367,15 @@ function renderLanguageToolPanel() {
     summaryLines.push(
       feedbackLine(
         totalMatches > 0 ? "warn" : "ok",
-        `Gepruefte Felder: ${checkedFields.length}. Treffer gesamt: ${totalMatches}. Fehlerfreie Felder: ${cleanFields}.`
+        `Geprüfte Felder: ${checkedFields.length}. Treffer gesamt: ${totalMatches}. Fehlerfreie Felder: ${cleanFields}.`
       )
     );
   }
   if (staleLabels.length) {
-    summaryLines.push(feedbackLine("warn", `Pruefung veraltet fuer: ${staleLabels.join(", ")}.`));
+    summaryLines.push(feedbackLine("warn", `Prüfung veraltet für: ${staleLabels.join(", ")}.`));
   }
   if (!summaryLines.length) {
-    summaryLines.push(feedbackLine("ok", "Bereit fuer eine lokale LanguageTool-Pruefung."));
+    summaryLines.push(feedbackLine("ok", "Bereit für eine lokale LanguageTool-Prüfung."));
   }
   languageToolSummary.innerHTML = summaryLines.join("");
 
@@ -399,8 +399,8 @@ function renderLanguageToolPanel() {
 
     entry.matches.forEach((match) => {
       const suggestions = match.replacements.length
-        ? `<p class="language-tool-suggestions">Vorschlaege: ${escapeHtml(match.replacements.join(", "))}</p>`
-        : `<p class="language-tool-suggestions">Keine direkten Vorschlaege vorhanden.</p>`;
+        ? `<p class="language-tool-suggestions">Vorschläge: ${escapeHtml(match.replacements.join(", "))}</p>`
+        : `<p class="language-tool-suggestions">Keine direkten Vorschläge vorhanden.</p>`;
       resultCards.push(`
         <article class="language-tool-result warn">
           <h4>${escapeHtml(fieldLabel)}</h4>
@@ -415,7 +415,7 @@ function renderLanguageToolPanel() {
 
   languageToolResults.innerHTML = resultCards.length
     ? resultCards.join("")
-    : `<article class="language-tool-result ok"><h4>Keine Treffer</h4><p>Fuer die zuletzt geprueften Texte wurden keine LanguageTool-Treffer gespeichert.</p></article>`;
+    : `<article class="language-tool-result ok"><h4>Keine Treffer</h4><p>Für die zuletzt geprüften Texte wurden keine LanguageTool-Treffer gespeichert.</p></article>`;
 }
 
 async function runLanguageToolCheck() {
@@ -534,7 +534,7 @@ function validateTextField(value, options = {}) {
   if (max) {
     const remaining = max - length;
     if (remaining < 0) {
-      lines.push(feedbackLine("error", `${length}/${max} Zeichen. Limit ueberschritten.`));
+      lines.push(feedbackLine("error", `${length}/${max} Zeichen. Limit überschritten.`));
       overLimit = true;
       level = "error";
     } else if (remaining <= Math.max(8, Math.round(max * 0.08))) {
@@ -551,13 +551,13 @@ function validateTextField(value, options = {}) {
       lines.push(
         feedbackLine(
           "warn",
-          `${length}/${targetChars} Zeichen. Mehr als 10 Prozent unter der Soll-Laenge.`
+          `${length}/${targetChars} Zeichen. Mehr als 10 Prozent unter der Soll-Länge.`
         )
       );
       underTarget = true;
       if (level !== "error") level = "warn";
     } else {
-      lines.push(feedbackLine("ok", `Soll-Laenge erreicht: mindestens ${minimumPreferred} Zeichen.`));
+      lines.push(feedbackLine("ok", `Soll-Länge erreicht: mindestens ${minimumPreferred} Zeichen.`));
     }
   }
 
@@ -727,7 +727,7 @@ function updateReadiness(results) {
   if (overLimitFields.length) {
     items.push({
       level: "error",
-      label: `Zu lang und fuer den Export gesperrt: ${overLimitFields.join(", ")}.`
+      label: `Zu lang und für den Export gesperrt: ${overLimitFields.join(", ")}.`
     });
   } else if (underTargetFields.length) {
     items.push({
@@ -737,7 +737,7 @@ function updateReadiness(results) {
   } else {
     items.push({
       level: "ok",
-      label: "Formale Laengen sehen gut aus."
+      label: "Formale Längen sehen gut aus."
     });
   }
 
@@ -815,7 +815,7 @@ function renderPreview() {
   preview.subtitle.textContent =
     state.subtitle || "Untertitel mit Fragestellung und Vornamen der Debattierenden";
   preview.lead.textContent =
-    state.lead || "Zugkraeftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.";
+    state.lead || "Zugkräftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.";
   preview.debaters.textContent = state.debaterNames || "Debattierende";
   preview.quote.textContent = state.quoteText ? `„${state.quoteText}“` : "„Knackiges Zitat aus der Debatte“";
   preview.quoteSpeaker.textContent = state.quoteSpeaker || "Name Debattierende:r";
@@ -823,7 +823,7 @@ function renderPreview() {
   preview.debateCaption.textContent = state.debateCaption || "Bildlegende des Debattenbilds";
   preview.blockOne.innerHTML = paragraphsToHtml(
     state.blockOne,
-    "Bericht Teil 1: Einfuehrungsreden und freie Aussprache."
+    "Bericht Teil 1: Einführungsreden und freie Aussprache."
   );
   preview.blockTwo.innerHTML = paragraphsToHtml(
     state.blockTwo,
@@ -1406,7 +1406,7 @@ function downloadWordDocument() {
     .filter(([, result]) => result.overLimit)
     .map(([field]) => field);
   if (missingRequired.length) {
-    window.alert("Pflichtfelder fehlen noch. Bitte zuerst alle Kernrubriken ausfuellen.");
+    window.alert("Pflichtfelder fehlen noch. Bitte zuerst alle Kernrubriken ausfüllen.");
     return;
   }
   if (overLimitFields.length) {
@@ -1433,7 +1433,7 @@ async function handleFileInput(input) {
   }
 
   if (!/^image\/(png|jpeg)$/i.test(file.type)) {
-    window.alert("Bitte ein PNG- oder JPG-Bild waehlen. Diese Formate werden im DOCX-Export unterstuetzt.");
+    window.alert("Bitte ein PNG- oder JPG-Bild wählen. Diese Formate werden im DOCX-Export unterstützt.");
     input.value = "";
     return;
   }
@@ -1510,7 +1510,7 @@ function fillSampleData() {
 }
 
 function resetForm() {
-  const confirmed = window.confirm("Alle Eingaben, Bilder und Feedbacks zuruecksetzen?");
+  const confirmed = window.confirm("Alle Eingaben, Bilder und Feedbacks zurücksetzen?");
   if (!confirmed) return;
 
   form.reset();
