@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Debattenbericht-Template</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Template fuer Debattenberichte</p>
+      <h1>Debattenbericht-Generator</h1>
+      <p class="intro">
+        Erfasst Titel, Lead, Berichtsteile, Bilder und Zitat in einer Eingabemaske mit Sofortfeedback.
+        Das Layout orientiert sich an der gelieferten Vorlage und laesst sich als echtes DOCX-Dokument exportieren.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button id="sampleButton" type="button" class="ghost-button">Beispieldaten laden</button>
+      <button id="exportButton" type="button" class="primary-button">DOCX exportieren</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="panel editor-panel">
+      <div class="panel-head">
+        <h2>Redaktionsmaske</h2>
+        <p>Alle Textfelder haben Browser-Rechtschreibpruefung aktiviert. Das Feedback prueft Form, Satzlaenge und Aktivstil.</p>
+      </div>
+
+      <form id="reportForm" novalidate>
+        <fieldset class="control-group">
+          <legend>Rahmendaten</legend>
+
+          <label class="control">
+            <span>Datum</span>
+            <input id="reportDate" name="reportDate" type="date">
+            <small class="hint">Wird in Kopfzeile und Export verwendet.</small>
+          </label>
+
+          <label class="control">
+            <span>Debattenthema</span>
+            <input
+              id="debateTheme"
+              name="debateTheme"
+              type="text"
+              maxlength="120"
+              placeholder="z. B. Impfpflicht fuer Basisimpfungen"
+              spellcheck="true"
+            >
+            <small class="hint">Hilfsfeld fuer die Untertitel-Pruefung.</small>
+          </label>
+
+          <label class="control">
+            <span>Debattierende (Vornamen, kommagetrennt)</span>
+            <input
+              id="debaterNames"
+              name="debaterNames"
+              type="text"
+              maxlength="120"
+              placeholder="Leonie, Anne, Nicolas, Michelle"
+              spellcheck="true"
+            >
+            <small class="hint">Wird genutzt, um zu pruefen, ob der Untertitel die Vornamen aufnimmt.</small>
+          </label>
+
+          <label class="control">
+            <span>Autor*innennamen</span>
+            <input
+              id="authorNames"
+              name="authorNames"
+              type="text"
+              maxlength="100"
+              placeholder="Vorname Nachname, Vorname Nachname"
+              spellcheck="true"
+            >
+            <small class="hint">Dient zugleich als Bildlegende fuer das Autorenbild.</small>
+            <div class="feedback" data-feedback-for="authorNames"></div>
+          </label>
+        </fieldset>
+
+        <fieldset class="control-group">
+          <legend>Titelstrecke</legend>
+
+          <label class="control">
+            <span>Titel</span>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              maxlength="50"
+              placeholder="Packender Titel mit maximal 50 Zeichen"
+              spellcheck="true"
+            >
+            <small class="hint">Maximal 50 Zeichen inklusive Leerzeichen.</small>
+            <div class="feedback" data-feedback-for="title"></div>
+          </label>
+
+          <label class="control">
+            <span>Untertitel</span>
+            <textarea
+              id="subtitle"
+              name="subtitle"
+              rows="3"
+              maxlength="80"
+              placeholder="Fragestellung der Debatte und die Vornamen der Debattierenden"
+              spellcheck="true"
+            ></textarea>
+            <small class="hint">Maximal 80 Zeichen. Soll Thema und Vornamen der Debattierenden nennen.</small>
+            <div class="feedback" data-feedback-for="subtitle"></div>
+          </label>
+
+          <label class="control">
+            <span>Lead</span>
+            <textarea
+              id="lead"
+              name="lead"
+              rows="5"
+              maxlength="500"
+              placeholder="Kurzer Eye-Catcher mit allen W-Fragen und einer Bilanz der Debatte"
+              spellcheck="true"
+            ></textarea>
+            <small class="hint">Maximal 500 Zeichen inklusive Leerzeichen.</small>
+            <div class="feedback" data-feedback-for="lead"></div>
+          </label>
+        </fieldset>
+
+        <fieldset class="control-group">
+          <legend>Berichtstext</legend>
+
+          <label class="control">
+            <span>Themenblock 1</span>
+            <textarea
+              id="blockOne"
+              name="blockOne"
+              rows="12"
+              maxlength="3000"
+              placeholder="Einfuehrungsreden und freie Aussprache, rund 3000 Zeichen"
+              spellcheck="true"
+            ></textarea>
+            <small class="hint">Maximal 3000 Zeichen inklusive Leerzeichen.</small>
+            <div class="feedback" data-feedback-for="blockOne"></div>
+          </label>
+
+          <label class="control">
+            <span>Themenblock 2</span>
+            <textarea
+              id="blockTwo"
+              name="blockTwo"
+              rows="12"
+              maxlength="3000"
+              placeholder="Publikumsbeteiligung, Schluss, Mentimeter-Resultate und weitere Schwerpunkte"
+              spellcheck="true"
+            ></textarea>
+            <small class="hint">Maximal 3000 Zeichen inklusive Leerzeichen.</small>
+            <div class="feedback" data-feedback-for="blockTwo"></div>
+          </label>
+        </fieldset>
+
+        <fieldset class="control-group">
+          <legend>Bilder und Zitat</legend>
+
+          <label class="control upload-control">
+            <span>Debattenbild hochladen</span>
+            <input id="debateImage" name="debateImage" type="file" accept="image/png,image/jpeg">
+            <small class="hint">Wird in der Endversion grossflaechig eingebaut. Fuer den DOCX-Export bitte PNG oder JPG verwenden.</small>
+          </label>
+
+          <label class="control">
+            <span>Bildlegende Debattenbild</span>
+            <input
+              id="debateCaption"
+              name="debateCaption"
+              type="text"
+              maxlength="100"
+              placeholder="Max. 100 Zeichen inklusive Leerzeichen"
+              spellcheck="true"
+            >
+            <small class="hint">Maximal 100 Zeichen inklusive Leerzeichen.</small>
+            <div class="feedback" data-feedback-for="debateCaption"></div>
+          </label>
+
+          <label class="control upload-control">
+            <span>Autorenbild hochladen</span>
+            <input id="authorImage" name="authorImage" type="file" accept="image/png,image/jpeg">
+            <small class="hint">Das Autorenbild wird mit den Autor*innennamen beschriftet. Fuer den DOCX-Export bitte PNG oder JPG verwenden.</small>
+          </label>
+
+          <label class="control">
+            <span>Zitat aus der Debatte</span>
+            <textarea
+              id="quoteText"
+              name="quoteText"
+              rows="4"
+              maxlength="220"
+              placeholder="Praegnantes Zitat aus der Debatte"
+              spellcheck="true"
+            ></textarea>
+            <small class="hint">Kurz und zugkraeftig formulieren.</small>
+            <div class="feedback" data-feedback-for="quoteText"></div>
+          </label>
+
+          <label class="control">
+            <span>Name der zitierten Person</span>
+            <input
+              id="quoteSpeaker"
+              name="quoteSpeaker"
+              type="text"
+              maxlength="80"
+              placeholder="Vorname Nachname oder Rolle"
+              spellcheck="true"
+            >
+            <small class="hint">Wird unterhalb des Zitats angezeigt.</small>
+            <div class="feedback" data-feedback-for="quoteSpeaker"></div>
+          </label>
+        </fieldset>
+      </form>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="panel-head">
+        <h2>Live-Vorschau</h2>
+        <p>Die Vorschau uebernimmt das Zeitungsraster der Screenshots in einer druckbaren A4-Komposition.</p>
+      </div>
+
+      <section class="readiness-card">
+        <h3>Export-Status</h3>
+        <ul id="readinessList" class="readiness-list"></ul>
+      </section>
+
+      <article class="report-page" id="previewRoot">
+        <header class="report-masthead">
+          <div class="report-brand">
+            <div class="brand-mark">
+              <span class="brand-red"></span>
+              <span class="brand-word">KSA</span>
+              <span class="brand-black"></span>
+            </div>
+            <p>Kantonsschule Ausserschwyz<br>Gymi und FMS</p>
+          </div>
+          <div class="report-meta">
+            <p>Bericht von <span id="previewAuthorsInline">Autor*innenteam</span></p>
+            <p id="previewDateInline">09.03.2026</p>
+          </div>
+        </header>
+
+        <div class="section-bar">DEBATTENBERICHT</div>
+
+        <section class="title-frame">
+          <p class="topline" id="previewTheme">Debattenthema</p>
+          <h1 id="previewTitle">Packender, zur Debatte passender Titel</h1>
+          <h2 id="previewSubtitle">Untertitel mit Fragestellung und Vornamen der Debattierenden</h2>
+        </section>
+
+        <section class="lede-grid">
+          <figure class="author-figure">
+            <div class="image-shell portrait-shell">
+              <img id="previewAuthorImage" alt="Autorenbild" hidden>
+              <div class="image-placeholder" id="authorImagePlaceholder">Autorenbild</div>
+            </div>
+            <figcaption id="previewAuthorCaption">Autor*innennamen</figcaption>
+          </figure>
+
+          <div class="lead-column">
+            <p class="lead-text" id="previewLead">
+              Zugkraeftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.
+            </p>
+
+            <div class="meta-strip">
+              <span id="previewDebaters">Debattierende</span>
+              <span id="previewDateBadge">09.03.2026</span>
+            </div>
+
+            <blockquote class="quote-box">
+              <p id="previewQuote">"Knackiges Zitat aus der Debatte"</p>
+              <cite id="previewQuoteSpeaker">Name Debattierende:r</cite>
+            </blockquote>
+          </div>
+        </section>
+
+        <section class="copy-grid">
+          <div class="copy-column">
+            <h3>Bericht Teil 1</h3>
+            <div class="rich-copy" id="previewBlockOne"></div>
+          </div>
+          <div class="copy-column">
+            <h3>Bericht Teil 2</h3>
+            <div class="rich-copy" id="previewBlockTwo"></div>
+          </div>
+        </section>
+
+        <figure class="debate-figure">
+          <div class="image-shell landscape-shell">
+            <img id="previewDebateImage" alt="Debattenbild" hidden>
+            <div class="image-placeholder" id="debateImagePlaceholder">Debattenbild</div>
+          </div>
+          <figcaption id="previewDebateCaption">Bildlegende des Debattenbilds</figcaption>
+        </figure>
+      </article>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
