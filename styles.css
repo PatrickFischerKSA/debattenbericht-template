@@ -172,6 +172,24 @@ textarea {
   line-height: 1.5;
 }
 
+.control input.field-ok,
+.control textarea.field-ok {
+  border-color: rgba(31, 107, 66, 0.7);
+}
+
+.control input.field-warn,
+.control textarea.field-warn {
+  border-color: rgba(154, 93, 0, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(154, 93, 0, 0.18);
+}
+
+.control input.field-error,
+.control textarea.field-error {
+  border-color: rgba(159, 31, 31, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(159, 31, 31, 0.22);
+  background: rgba(255, 244, 244, 0.96);
+}
+
 .control input[type="file"] {
   border: 1px dashed rgba(0, 0, 0, 0.35);
   background: rgba(255, 255, 255, 0.75);

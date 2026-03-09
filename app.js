@@ -190,6 +190,18 @@ function feedbackLine(level, message) {
   return `<div class="feedback-line ${level}">${message}</div>`;
 }
 
+function setFieldState(field, level) {
+  const target = form.elements.namedItem(field);
+  if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) {
+    return;
+  }
+
+  target.classList.remove("field-ok", "field-warn", "field-error");
+  if (level) {
+    target.classList.add(`field-${level}`);
+  }
+}
+
 function setFeedback(field, lines) {
   const target = document.querySelector(`[data-feedback-for="${field}"]`);
   if (!target) return;
@@ -201,25 +213,56 @@ function validateTextField(value, options = {}) {
   const length = countChars(value);
   const max = options.maxChars;
   const min = options.minChars || 0;
+  const targetChars = options.targetChars || 0;
 
   if (!value.trim()) {
     lines.push(feedbackLine(options.required ? "error" : "warn", "Eingabe fehlt."));
-    return { ok: !options.required, lines };
+    return {
+      ok: !options.required,
+      lines,
+      overLimit: false,
+      underTarget: false,
+      level: options.required ? "error" : "warn"
+    };
   }
+
+  let overLimit = false;
+  let underTarget = false;
+  let level = "ok";
 
   if (max) {
     const remaining = max - length;
     if (remaining < 0) {
-      lines.push(feedbackLine("error", `${length}/${max} Zeichen. Limit überschritten.`));
+      lines.push(feedbackLine("error", `${length}/${max} Zeichen. Limit ueberschritten.`));
+      overLimit = true;
+      level = "error";
     } else if (remaining <= Math.max(8, Math.round(max * 0.08))) {
       lines.push(feedbackLine("warn", `${length}/${max} Zeichen. Knapp am Limit.`));
+      if (level !== "error") level = "warn";
     } else {
       lines.push(feedbackLine("ok", `${length}/${max} Zeichen. Formales Limit eingehalten.`));
     }
   }
 
+  if (targetChars) {
+    const minimumPreferred = Math.ceil(targetChars * 0.9);
+    if (length < minimumPreferred) {
+      lines.push(
+        feedbackLine(
+          "warn",
+          `${length}/${targetChars} Zeichen. Mehr als 10 Prozent unter der Soll-Laenge.`
+        )
+      );
+      underTarget = true;
+      if (level !== "error") level = "warn";
+    } else {
+      lines.push(feedbackLine("ok", `Soll-Laenge erreicht: mindestens ${minimumPreferred} Zeichen.`));
+    }
+  }
+
   if (min && length < min) {
     lines.push(feedbackLine("warn", `Noch knapp: ${length} Zeichen von empfohlenen ${min}.`));
+    if (level !== "error") level = "warn";
   }
 
   const style = analyzeStyle(value);
@@ -230,32 +273,41 @@ function validateTextField(value, options = {}) {
         `${style.longSentences.length} lange Sätze erkannt. Ziel: möglichst unter 25 Wörtern pro Satz.`
       )
     );
+    if (level !== "error") level = "warn";
   } else if (style.sentenceCount > 0) {
     lines.push(feedbackLine("ok", "Satzlängen wirken kompakt."));
   }
 
   if (style.passiveSentences.length) {
     lines.push(feedbackLine("warn", `${style.passiveSentences.length} Passiv-Muster erkannt. Aktiv formulieren.`));
+    if (level !== "error") level = "warn";
   } else if (style.sentenceCount > 0) {
     lines.push(feedbackLine("ok", "Aktivstil wirkt stimmig."));
   }
 
   if (style.repeatedWord) {
     lines.push(feedbackLine("warn", "Doppeltes Wortmuster erkannt. Noch einmal gegenlesen."));
+    if (level !== "error") level = "warn";
   }
 
   if (style.lowercaseStart) {
     lines.push(feedbackLine("warn", "Mindestens ein Satz beginnt vermutlich mit kleinem Buchstaben."));
+    if (level !== "error") level = "warn";
   }
 
   lines.push(feedbackLine("ok", "Browser-Rechtschreibprüfung ist aktiv."));
 
-  const hardError = lines.some((line) => line.includes("error"));
-  return { ok: !hardError, lines };
+  return {
+    ok: !overLimit,
+    lines,
+    overLimit,
+    underTarget,
+    level
+  };
 }
 
 function validateSubtitle(value) {
-  const result = validateTextField(value, { maxChars: 80, required: true, minChars: 25 });
+  const result = validateTextField(value, { maxChars: 80, required: true, minChars: 25, targetChars: 80 });
   const lower = value.toLowerCase();
   const firstNames = getFirstNames();
   const themeKeywords = getThemeKeywords();
@@ -284,7 +336,7 @@ function validateSubtitle(value) {
 }
 
 function validateLead(value) {
-  const result = validateTextField(value, { maxChars: 500, required: true, minChars: 180 });
+  const result = validateTextField(value, { maxChars: 500, required: true, minChars: 180, targetChars: 500 });
   const coverage = analyzeLead(value);
   const missing = Object.entries(coverage)
     .filter(([, present]) => !present)
@@ -313,12 +365,14 @@ function validateAll() {
   results.blockOne = validateTextField(state.blockOne, {
     maxChars: 3000,
     required: true,
-    minChars: 2200
+    minChars: 2200,
+    targetChars: 3000
   });
   results.blockTwo = validateTextField(state.blockTwo, {
     maxChars: 3000,
     required: true,
-    minChars: 2200
+    minChars: 2200,
+    targetChars: 3000
   });
   results.debateCaption = validateTextField(state.debateCaption, {
     maxChars: 100,
@@ -336,13 +390,26 @@ function validateAll() {
     minChars: 3
   });
 
-  Object.entries(results).forEach(([field, result]) => setFeedback(field, result.lines));
+  Object.entries(results).forEach(([field, result]) => {
+    setFeedback(field, result.lines);
+    setFieldState(field, result.level);
+  });
   return results;
 }
 
 function updateReadiness(results) {
   const items = [];
   const missingRequired = requiredFields.filter((field) => !String(state[field] || "").trim());
+  const overLimitFields = Object.entries(results)
+    .filter(([, result]) => result.overLimit)
+    .map(([field]) => field);
+  const underTargetFields = Object.entries(results)
+    .filter(([, result]) => result.underTarget)
+    .map(([field]) => field);
+  const styleHintFields = Object.entries(results)
+    .filter(([, result]) => !result.overLimit && result.level === "warn" && !result.underTarget)
+    .map(([field]) => field);
+
   if (missingRequired.length) {
     items.push({
       level: "error",
@@ -355,19 +422,32 @@ function updateReadiness(results) {
     });
   }
 
-  const invalidFields = Object.entries(results)
-    .filter(([, result]) => !result.ok)
-    .map(([field]) => field);
-
-  if (invalidFields.length) {
+  if (overLimitFields.length) {
+    items.push({
+      level: "error",
+      label: `Zu lang und fuer den Export gesperrt: ${overLimitFields.join(", ")}.`
+    });
+  } else if (underTargetFields.length) {
     items.push({
       level: "warn",
-      label: `Formale oder stilistische Hinweise offen: ${invalidFields.join(", ")}.`
+      label: `Mehr als 10 Prozent zu kurz: ${underTargetFields.join(", ")}.`
     });
   } else {
     items.push({
       level: "ok",
-      label: "Formale Kriterien und Stilprüfungen sehen gut aus."
+      label: "Formale Laengen sehen gut aus."
+    });
+  }
+
+  if (styleHintFields.length) {
+    items.push({
+      level: "warn",
+      label: `Stilistische Hinweise offen: ${styleHintFields.join(", ")}.`
+    });
+  } else {
+    items.push({
+      level: "ok",
+      label: "Keine weiteren stilistischen Warnhinweise."
     });
   }
 
@@ -399,7 +479,7 @@ function updateReadiness(results) {
     .map((item) => `<li class="${item.level}">${escapeHtml(item.label)}</li>`)
     .join("");
 
-  exportButton.disabled = missingRequired.length > 0;
+  exportButton.disabled = missingRequired.length > 0 || overLimitFields.length > 0;
 }
 
 function updatePreviewImages() {
@@ -1020,8 +1100,15 @@ function downloadWordDocument() {
   const results = validateAll();
   updateReadiness(results);
   const missingRequired = requiredFields.filter((field) => !String(state[field] || "").trim());
+  const overLimitFields = Object.entries(results)
+    .filter(([, result]) => result.overLimit)
+    .map(([field]) => field);
   if (missingRequired.length) {
     window.alert("Pflichtfelder fehlen noch. Bitte zuerst alle Kernrubriken ausfuellen.");
+    return;
+  }
+  if (overLimitFields.length) {
+    window.alert(`Der Export ist gesperrt. Diese Felder sind zu lang: ${overLimitFields.join(", ")}.`);
     return;
   }
 
