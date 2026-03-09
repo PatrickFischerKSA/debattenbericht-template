@@ -3,6 +3,11 @@ const exportButton = document.getElementById("exportButton");
 const sampleButton = document.getElementById("sampleButton");
 const resetButton = document.getElementById("resetButton");
 const readinessList = document.getElementById("readinessList");
+const languageToolCheckButton = document.getElementById("languageToolCheckButton");
+const languageToolStatus = document.getElementById("languageToolStatus");
+const languageToolSummary = document.getElementById("languageToolSummary");
+const languageToolResults = document.getElementById("languageToolResults");
+const languageToolConfigLine = document.getElementById("languageToolConfigLine");
 
 const preview = {
   authorsInline: document.getElementById("previewAuthorsInline"),
@@ -54,6 +59,42 @@ const requiredFields = [
   "quoteText",
   "quoteSpeaker"
 ];
+
+const languageToolConfig = window.DEBATTENBERICHT_CONFIG || {};
+const languageToolService =
+  typeof window.LanguageToolService === "function"
+    ? new window.LanguageToolService({
+        baseUrl: languageToolConfig.languageToolBaseUrl,
+        language: languageToolConfig.languageToolLanguage,
+        timeoutMs: languageToolConfig.languageToolTimeoutMs
+      })
+    : null;
+
+const languageToolFields = [
+  { name: "debateTheme", label: "Debattenthema" },
+  { name: "debaterNames", label: "Debattierende" },
+  { name: "authorNames", label: "Autor*innennamen" },
+  { name: "title", label: "Titel" },
+  { name: "subtitle", label: "Untertitel" },
+  { name: "lead", label: "Lead" },
+  { name: "blockOne", label: "Themenblock 1" },
+  { name: "blockTwo", label: "Themenblock 2" },
+  { name: "debateCaption", label: "Bildlegende Debattenbild" },
+  { name: "quoteText", label: "Zitat" },
+  { name: "quoteSpeaker", label: "Zitatperson" }
+];
+
+const languageToolFieldLabelMap = Object.fromEntries(
+  languageToolFields.map((field) => [field.name, field.label])
+);
+
+const languageToolState = {
+  running: false,
+  globalError: "",
+  resultsByField: {},
+  staleFields: new Set(),
+  lastCheckedAt: ""
+};
 
 function toInputDate(date) {
   const year = date.getFullYear();
@@ -206,6 +247,266 @@ function setFeedback(field, lines) {
   const target = document.querySelector(`[data-feedback-for="${field}"]`);
   if (!target) return;
   target.innerHTML = lines.join("");
+}
+
+function mergeSignalLevels(primary, secondary) {
+  const weight = { error: 3, warn: 2, ok: 1, "": 0, null: 0, undefined: 0 };
+  return (weight[secondary] || 0) > (weight[primary] || 0) ? secondary : primary;
+}
+
+function getLanguageToolFeedback(field) {
+  const result = languageToolState.resultsByField[field];
+  if (!result) {
+    return { lines: [], level: null };
+  }
+
+  if (result.status === "error") {
+    return {
+      lines: [feedbackLine("warn", `LanguageTool: ${escapeHtml(result.message)}`)],
+      level: "warn"
+    };
+  }
+
+  if (!result.matches.length) {
+    return {
+      lines: [feedbackLine("ok", "LanguageTool: keine Treffer in der letzten Pruefung.")],
+      level: null
+    };
+  }
+
+  return {
+    lines: [feedbackLine("warn", `LanguageTool: ${result.matches.length} Treffer. Details in der Pruefliste.`)],
+    level: "warn"
+  };
+}
+
+function clipTextContext(text, offset, length) {
+  const source = String(text || "");
+  const start = Math.max(0, offset - 35);
+  const end = Math.min(source.length, offset + length + 35);
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < source.length ? "..." : "";
+  return `${prefix}${source.slice(start, end)}${suffix}`;
+}
+
+function normalizeLanguageToolMatches(fieldName, text, matches) {
+  return matches.map((match) => ({
+    fieldName,
+    message: match.message || "Unbekannter LanguageTool-Hinweis.",
+    offset: Number(match.offset || 0),
+    length: Number(match.length || 0),
+    context: clipTextContext(text, Number(match.offset || 0), Number(match.length || 0)),
+    replacements: Array.isArray(match.replacements)
+      ? match.replacements.map((entry) => entry.value).filter(Boolean).slice(0, 5)
+      : [],
+    ruleId: match.rule && match.rule.id ? match.rule.id : ""
+  }));
+}
+
+function describeLanguageToolError(error) {
+  if (!error) {
+    return "Unbekannter Fehler bei der LanguageTool-Pruefung.";
+  }
+  if (error.message) {
+    return error.message;
+  }
+  return String(error);
+}
+
+function clearLanguageToolState() {
+  languageToolState.globalError = "";
+  languageToolState.resultsByField = {};
+  languageToolState.staleFields.clear();
+  languageToolState.lastCheckedAt = "";
+}
+
+function invalidateLanguageToolField(fieldName) {
+  if (!languageToolFieldLabelMap[fieldName]) return;
+  delete languageToolState.resultsByField[fieldName];
+  languageToolState.staleFields.add(fieldName);
+}
+
+function renderLanguageToolPanel() {
+  if (!languageToolStatus || !languageToolResults || !languageToolSummary || !languageToolConfigLine) {
+    return;
+  }
+
+  const baseUrl = languageToolConfig.languageToolBaseUrl || "http://localhost:8081/v2/check";
+  const language = languageToolConfig.languageToolLanguage || "de-DE";
+  languageToolConfigLine.textContent = `Server: ${baseUrl} · Sprache: ${language}`;
+
+  if (!languageToolService) {
+    languageToolStatus.textContent = "LanguageTool-Service konnte nicht initialisiert werden.";
+    languageToolSummary.innerHTML = feedbackLine("error", "Die Service-Schicht fehlt im Browser.");
+    languageToolResults.innerHTML = "";
+    return;
+  }
+
+  if (languageToolState.running) {
+    languageToolStatus.textContent = "LanguageTool prueft die Texte ...";
+  } else if (languageToolState.globalError) {
+    languageToolStatus.textContent = `LanguageTool-Fehler: ${languageToolState.globalError}`;
+  } else if (languageToolState.lastCheckedAt) {
+    languageToolStatus.textContent = `Letzte Pruefung: ${languageToolState.lastCheckedAt}`;
+  } else {
+    languageToolStatus.textContent = "Noch keine LanguageTool-Pruefung ausgefuehrt.";
+  }
+
+  const checkedFields = Object.values(languageToolState.resultsByField).filter((entry) => entry.status === "ready");
+  const totalMatches = checkedFields.reduce((sum, entry) => sum + entry.matches.length, 0);
+  const cleanFields = checkedFields.filter((entry) => entry.matches.length === 0).length;
+  const staleLabels = Array.from(languageToolState.staleFields)
+    .map((field) => languageToolFieldLabelMap[field])
+    .filter(Boolean);
+
+  const summaryLines = [];
+  if (languageToolState.globalError) {
+    summaryLines.push(feedbackLine("error", languageToolState.globalError));
+  }
+  if (checkedFields.length) {
+    summaryLines.push(
+      feedbackLine(
+        totalMatches > 0 ? "warn" : "ok",
+        `Gepruefte Felder: ${checkedFields.length}. Treffer gesamt: ${totalMatches}. Fehlerfreie Felder: ${cleanFields}.`
+      )
+    );
+  }
+  if (staleLabels.length) {
+    summaryLines.push(feedbackLine("warn", `Pruefung veraltet fuer: ${staleLabels.join(", ")}.`));
+  }
+  if (!summaryLines.length) {
+    summaryLines.push(feedbackLine("ok", "Bereit fuer eine lokale LanguageTool-Pruefung."));
+  }
+  languageToolSummary.innerHTML = summaryLines.join("");
+
+  const resultCards = [];
+  Object.entries(languageToolState.resultsByField).forEach(([fieldName, entry]) => {
+    const fieldLabel = languageToolFieldLabelMap[fieldName] || fieldName;
+    if (entry.status === "error") {
+      resultCards.push(`
+        <article class="language-tool-result error">
+          <h4>${escapeHtml(fieldLabel)}</h4>
+          <p>${escapeHtml(entry.message)}</p>
+          <button type="button" data-focus-field="${escapeHtml(fieldName)}">Zum Feld</button>
+        </article>
+      `);
+      return;
+    }
+
+    if (!entry.matches.length) {
+      return;
+    }
+
+    entry.matches.forEach((match) => {
+      const suggestions = match.replacements.length
+        ? `<p class="language-tool-suggestions">Vorschlaege: ${escapeHtml(match.replacements.join(", "))}</p>`
+        : `<p class="language-tool-suggestions">Keine direkten Vorschlaege vorhanden.</p>`;
+      resultCards.push(`
+        <article class="language-tool-result warn">
+          <h4>${escapeHtml(fieldLabel)}</h4>
+          <p><strong>Stelle:</strong> ${escapeHtml(match.context)}</p>
+          <p><strong>Meldung:</strong> ${escapeHtml(match.message)}</p>
+          ${suggestions}
+          <button type="button" data-focus-field="${escapeHtml(fieldName)}">Zum Feld</button>
+        </article>
+      `);
+    });
+  });
+
+  languageToolResults.innerHTML = resultCards.length
+    ? resultCards.join("")
+    : `<article class="language-tool-result ok"><h4>Keine Treffer</h4><p>Fuer die zuletzt geprueften Texte wurden keine LanguageTool-Treffer gespeichert.</p></article>`;
+}
+
+async function runLanguageToolCheck() {
+  if (!languageToolService) {
+    languageToolState.globalError = "LanguageTool-Service steht nicht bereit.";
+    renderLanguageToolPanel();
+    return;
+  }
+
+  const nonEmptyFields = languageToolFields.filter((field) => String(state[field.name] || "").trim());
+  if (!nonEmptyFields.length) {
+    languageToolState.globalError = "";
+    languageToolState.resultsByField = {};
+    languageToolState.staleFields.clear();
+    languageToolState.lastCheckedAt = "";
+    renderLanguageToolPanel();
+    return;
+  }
+
+  languageToolState.running = true;
+  languageToolState.globalError = "";
+  languageToolState.resultsByField = {};
+  languageToolState.staleFields.clear();
+  renderLanguageToolPanel();
+  if (languageToolCheckButton) {
+    languageToolCheckButton.disabled = true;
+  }
+
+  const sharedOptions = {
+    baseUrl: languageToolConfig.languageToolBaseUrl,
+    language: languageToolConfig.languageToolLanguage,
+    timeoutMs: languageToolConfig.languageToolTimeoutMs
+  };
+
+  const firstField = nonEmptyFields[0];
+  try {
+    const firstResponse = await languageToolService.checkText(state[firstField.name], sharedOptions);
+    languageToolState.resultsByField[firstField.name] = {
+      status: "ready",
+      matches: normalizeLanguageToolMatches(firstField.name, state[firstField.name], firstResponse.matches)
+    };
+  } catch (error) {
+    languageToolState.running = false;
+    languageToolState.globalError = describeLanguageToolError(error);
+    if (languageToolCheckButton) {
+      languageToolCheckButton.disabled = false;
+    }
+    renderLanguageToolPanel();
+    const validationResults = validateAll();
+    updateReadiness(validationResults);
+    return;
+  }
+
+  const remainingChecks = await Promise.allSettled(
+    nonEmptyFields.slice(1).map(async (field) => {
+      const response = await languageToolService.checkText(state[field.name], sharedOptions);
+      return {
+        fieldName: field.name,
+        matches: normalizeLanguageToolMatches(field.name, state[field.name], response.matches)
+      };
+    })
+  );
+
+  remainingChecks.forEach((entry, index) => {
+    const field = nonEmptyFields[index + 1];
+    if (entry.status === "fulfilled") {
+      languageToolState.resultsByField[entry.value.fieldName] = {
+        status: "ready",
+        matches: entry.value.matches
+      };
+      return;
+    }
+
+    languageToolState.resultsByField[field.name] = {
+      status: "error",
+      message: describeLanguageToolError(entry.reason),
+      matches: []
+    };
+  });
+
+  languageToolState.running = false;
+  languageToolState.lastCheckedAt = new Intl.DateTimeFormat("de-CH", {
+    dateStyle: "short",
+    timeStyle: "medium"
+  }).format(new Date());
+  if (languageToolCheckButton) {
+    languageToolCheckButton.disabled = false;
+  }
+  renderLanguageToolPanel();
+  const validationResults = validateAll();
+  updateReadiness(validationResults);
 }
 
 function validateTextField(value, options = {}) {
@@ -391,8 +692,9 @@ function validateAll() {
   });
 
   Object.entries(results).forEach(([field, result]) => {
-    setFeedback(field, result.lines);
-    setFieldState(field, result.level);
+    const languageToolFeedback = getLanguageToolFeedback(field);
+    setFeedback(field, [...result.lines, ...languageToolFeedback.lines]);
+    setFieldState(field, mergeSignalLevels(result.level, languageToolFeedback.level));
   });
   return results;
 }
@@ -1167,7 +1469,9 @@ function applyFormValues(values, options = {}) {
     });
   }
 
+  clearLanguageToolState();
   renderPreview();
+  renderLanguageToolPanel();
   updateReadiness(validateAll());
 }
 
@@ -1217,17 +1521,25 @@ function resetForm() {
   }, { clearFiles: true });
 }
 
-function updateAll() {
+function updateAll(changedFieldName = "") {
   syncStateFromForm();
+  if (changedFieldName) {
+    invalidateLanguageToolField(changedFieldName);
+  }
   renderPreview();
+  renderLanguageToolPanel();
   updateReadiness(validateAll());
 }
 
-form.addEventListener("input", updateAll);
+form.addEventListener("input", (event) => {
+  const target = event.target;
+  const fieldName = target && typeof target.name === "string" ? target.name : "";
+  updateAll(fieldName);
+});
 form.addEventListener("change", async (event) => {
   const target = event.target;
   if (!(target instanceof HTMLInputElement)) {
-    updateAll();
+    updateAll(target && typeof target.name === "string" ? target.name : "");
     return;
   }
 
@@ -1236,11 +1548,32 @@ form.addEventListener("change", async (event) => {
     return;
   }
 
-  updateAll();
+  updateAll(target.name || "");
 });
 
 sampleButton.addEventListener("click", fillSampleData);
 resetButton.addEventListener("click", resetForm);
 exportButton.addEventListener("click", downloadWordDocument);
+if (languageToolCheckButton) {
+  languageToolCheckButton.addEventListener("click", runLanguageToolCheck);
+}
+if (languageToolResults) {
+  languageToolResults.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    const focusField = target.getAttribute("data-focus-field");
+    if (!focusField) {
+      return;
+    }
+    const field = form.elements.namedItem(focusField);
+    if (field && typeof field.focus === "function") {
+      field.focus();
+      field.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+}
 
+renderLanguageToolPanel();
 updateAll();

@@ -129,6 +129,79 @@ textarea {
   padding: 1rem 1.2rem 1.2rem;
 }
 
+.language-tool-panel {
+  margin: 1rem 1.2rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.language-tool-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.language-tool-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+.language-tool-head .ghost-button {
+  white-space: nowrap;
+}
+
+.language-tool-results {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.language-tool-result {
+  border-left: 3px solid rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.03);
+  padding: 0.75rem 0.8rem;
+}
+
+.language-tool-result.error {
+  border-left-color: var(--danger);
+}
+
+.language-tool-result.warn {
+  border-left-color: var(--warning);
+}
+
+.language-tool-result.ok {
+  border-left-color: var(--success);
+}
+
+.language-tool-result h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+}
+
+.language-tool-result p {
+  margin: 0.15rem 0;
+  line-height: 1.45;
+}
+
+.language-tool-result button {
+  margin-top: 0.45rem;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+}
+
+.language-tool-suggestions {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
 .control-group {
   margin: 0 0 1.25rem;
   padding: 0.95rem;

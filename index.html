@@ -30,6 +30,19 @@
         <p>Alle Textfelder haben Browser-Rechtschreibpruefung aktiviert. Das Feedback prueft Form, Satzlaenge und Aktivstil.</p>
       </div>
 
+      <section class="language-tool-panel">
+        <div class="language-tool-head">
+          <div>
+            <h3>LanguageTool</h3>
+            <p id="languageToolConfigLine" class="hint">Server: wird geladen</p>
+          </div>
+          <button id="languageToolCheckButton" type="button" class="ghost-button">Text pruefen</button>
+        </div>
+        <p id="languageToolStatus" class="hint">Noch keine LanguageTool-Pruefung ausgefuehrt.</p>
+        <div id="languageToolSummary" class="feedback"></div>
+        <div id="languageToolResults" class="language-tool-results"></div>
+      </section>
+
       <form id="reportForm" novalidate>
         <fieldset class="control-group">
           <legend>Rahmendaten</legend>
@@ -291,6 +304,8 @@
     </section>
   </main>
 
+  <script src="./config.js"></script>
+  <script src="./language-tool-service.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
