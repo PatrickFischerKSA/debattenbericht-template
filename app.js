@@ -1,6 +1,7 @@
 const form = document.getElementById("reportForm");
 const exportButton = document.getElementById("exportButton");
 const sampleButton = document.getElementById("sampleButton");
+const resetButton = document.getElementById("resetButton");
 const readinessList = document.getElementById("readinessList");
 
 const preview = {
@@ -1057,6 +1058,30 @@ async function handleFileInput(input) {
   updateReadiness(validateAll());
 }
 
+function applyFormValues(values, options = {}) {
+  Object.entries(values).forEach(([key, value]) => {
+    if (key.endsWith("DataUrl")) {
+      state[key] = value;
+      return;
+    }
+
+    const field = form.elements.namedItem(key);
+    if (field) {
+      field.value = value;
+    }
+    state[key] = value;
+  });
+
+  if (options.clearFiles) {
+    Array.from(form.querySelectorAll('input[type="file"]')).forEach((input) => {
+      input.value = "";
+    });
+  }
+
+  renderPreview();
+  updateReadiness(validateAll());
+}
+
 function syncStateFromForm() {
   const formData = new FormData(form);
   Object.keys(defaultState).forEach((key) => {
@@ -1083,17 +1108,24 @@ function fillSampleData() {
     quoteText: "Anstatt die Leute zu zwingen, sollten wir Vertrauen schaffen.",
     quoteSpeaker: "Anne"
   };
+  applyFormValues({
+    ...defaultState,
+    authorImageDataUrl: "",
+    debateImageDataUrl: "",
+    ...sample
+  }, { clearFiles: true });
+}
 
-  Object.entries(sample).forEach(([key, value]) => {
-    const field = form.elements.namedItem(key);
-    if (field) {
-      field.value = value;
-    }
-    state[key] = value;
-  });
+function resetForm() {
+  const confirmed = window.confirm("Alle Eingaben, Bilder und Feedbacks zuruecksetzen?");
+  if (!confirmed) return;
 
-  renderPreview();
-  updateReadiness(validateAll());
+  form.reset();
+  applyFormValues({
+    ...defaultState,
+    authorImageDataUrl: "",
+    debateImageDataUrl: ""
+  }, { clearFiles: true });
 }
 
 function updateAll() {
@@ -1119,6 +1151,7 @@ form.addEventListener("change", async (event) => {
 });
 
 sampleButton.addEventListener("click", fillSampleData);
+resetButton.addEventListener("click", resetForm);
 exportButton.addEventListener("click", downloadWordDocument);
 
 updateAll();
