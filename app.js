@@ -816,26 +816,26 @@ function buildDocx() {
 
   const sectionBar = createParagraph("DEBATTENBERICHT", {
     align: "center",
-    spacingBefore: 120,
-    spacingAfter: 140,
-    borderBottom: { size: 18, color: "111111" },
-    run: { font: "Arial Black", fontSize: 24 }
+    spacingBefore: 70,
+    spacingAfter: 90,
+    borderBottom: { size: 16, color: "111111" },
+    run: { font: "Arial Black", fontSize: 22 }
   });
 
   const titleTable = createTable(
     createTableRow(
       createTableCell(
         createParagraph(debateTheme, {
-          run: { font: "Georgia", fontSize: 22 },
-          spacingAfter: 40
+          run: { font: "Georgia", fontSize: 18 },
+          spacingAfter: 24
         }) +
           createParagraph(titleText, {
-            run: { font: "Arial Black", fontSize: 44, color: "284D92" },
-            spacingAfter: 70
+            run: { font: "Arial Black", fontSize: 38, color: "284D92" },
+            spacingAfter: 40
           }) +
           createParagraph(subtitleText, {
-            run: { font: "Georgia", fontSize: 30 },
-            spacingAfter: 20
+            run: { font: "Georgia", fontSize: 24 },
+            spacingAfter: 6
           }),
         { width: 9600, border: 16, shading: "E1DDD7" }
       )
@@ -845,35 +845,35 @@ function buildDocx() {
 
   const authorCellContent =
     createImageParagraph(authorImage, {
-      cx: inchesToEmu(2.2),
-      cy: inchesToEmu(2.8),
+      cx: inchesToEmu(1.55),
+      cy: inchesToEmu(1.95),
       docPrId: authorImage ? authorImage.docPrId : 11,
       placeholder: "Autorenbild",
-      spacingAfter: 50
+      spacingAfter: 30
     }) +
     createParagraph(authorNames, {
-      run: { font: "Georgia", fontSize: 16 },
+      run: { font: "Georgia", fontSize: 14 },
       spacingAfter: 0
     });
 
   const leadCellContent =
     createParagraph(leadText, {
-      run: { font: "Georgia", fontSize: 25 },
-      line: 340,
-      spacingAfter: 120
+      run: { font: "Georgia", fontSize: 21 },
+      line: 290,
+      spacingAfter: 70
     }) +
     createParagraph(`${debaterNames} | ${dateLabel}`, {
-      run: { font: "Arial", fontSize: 14 },
-      spacingAfter: 120
+      run: { font: "Arial", fontSize: 12 },
+      spacingAfter: 70
     }) +
     createParagraph(`"${quoteText}"`, {
-      run: { font: "Arial Black", fontSize: 40, color: "284D92" },
-      line: 390,
-      spacingAfter: 40
+      run: { font: "Arial Black", fontSize: 28, color: "284D92" },
+      line: 310,
+      spacingAfter: 18
     }) +
     createParagraph(`- ${quoteSpeaker}`, {
       align: "right",
-      run: { font: "Georgia", fontSize: 18 },
+      run: { font: "Georgia", fontSize: 14 },
       spacingAfter: 0
     });
 
@@ -889,25 +889,25 @@ function buildDocx() {
     createTableRow(
       createTableCell(
           createParagraph("Bericht Teil 1", {
-            run: { font: "Arial Black", fontSize: 20 },
-            spacingAfter: 60
+            run: { font: "Arial Black", fontSize: 16 },
+            spacingAfter: 34
           }) +
           createParagraphsFromText(state.blockOne, {
             placeholder: "Bericht Teil 1: Einfuehrungsreden und freie Aussprache.",
-            paragraph: { spacingAfter: 110, line: 300 },
-            run: { font: "Georgia", fontSize: 19 }
+            paragraph: { spacingAfter: 70, line: 250 },
+            run: { font: "Georgia", fontSize: 16 }
           }),
         { width: 4700, border: 6 }
       ) +
         createTableCell(
           createParagraph("Bericht Teil 2", {
-            run: { font: "Arial Black", fontSize: 20 },
-            spacingAfter: 60
+            run: { font: "Arial Black", fontSize: 16 },
+            spacingAfter: 34
           }) +
             createParagraphsFromText(state.blockTwo, {
               placeholder: "Bericht Teil 2: Publikumsbeteiligung, Schluss und Mentimeter-Resultate.",
-              paragraph: { spacingAfter: 110, line: 300 },
-              run: { font: "Georgia", fontSize: 19 }
+              paragraph: { spacingAfter: 70, line: 250 },
+              run: { font: "Georgia", fontSize: 16 }
             }),
           { width: 4900, border: 6 }
         )
@@ -917,14 +917,16 @@ function buildDocx() {
 
   const debateFigure =
     createImageParagraph(debateImage, {
-      cx: inchesToEmu(6.6),
-      cy: inchesToEmu(3.7),
+      cx: inchesToEmu(3.0),
+      cy: inchesToEmu(1.9),
       docPrId: debateImage ? debateImage.docPrId : 12,
       placeholder: "Debattenbild",
-      spacingAfter: 40
+      align: "right",
+      spacingAfter: 18
     }) +
     createParagraph(debateCaption, {
-      run: { font: "Georgia", fontSize: 16 },
+      align: "right",
+      run: { font: "Georgia", fontSize: 13 },
       spacingAfter: 0
     });
 
@@ -932,13 +934,13 @@ function buildDocx() {
     mastheadTable +
     sectionBar +
     titleTable +
-    createParagraph("", { spacingAfter: 80 }) +
+    createParagraph("", { spacingAfter: 34 }) +
     ledeTable +
-    createParagraph("", { spacingAfter: 120 }) +
+    createParagraph("", { spacingAfter: 55 }) +
     copyTable +
-    createParagraph("", { spacingAfter: 120 }) +
+    createParagraph("", { spacingAfter: 40 }) +
     debateFigure +
-    `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="900" w:right="850" w:bottom="900" w:left="850" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr>`;
+    `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="650" w:right="700" w:bottom="650" w:left="700" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>`;
 
   const documentXml =
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
