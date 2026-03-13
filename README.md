@@ -47,7 +47,8 @@ Dann im Browser `http://localhost:4173` aufrufen.
 - `Titel`: maximal 50 Zeichen.
 - `Untertitel`: maximal 80 Zeichen; das Feedback prüft, ob Debattenthema und Vornamen der Debattierenden auftauchen.
 - `Lead`: maximal 500 Zeichen; das Feedback sucht heuristisch nach Wer, Was, Wann, Wo, Warum und einer Bilanz.
-- `Block 1` und `Block 2`: je maximal 1300 Zeichen; zusätzlich Hinweise zu langen Sätzen und Passivmustern.
+- `Block 1`: maximal 1300 Zeichen; zusätzlich Hinweise zu langen Sätzen und Passivmustern.
+- `Block 2`: maximal 700 Zeichen; zusätzlich Hinweise zu langen Sätzen und Passivmustern.
 - `Bildlegende Debattenbild`: maximal 100 Zeichen.
 - `DOCX-Export`: erzeugt eine echte `.docx`-Datei mit eingebetteten PNG-/JPG-Bildern.
 - `LanguageTool`: prüft Texte gegen einen selbst gehosteten HTTP-Server.

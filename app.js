@@ -66,7 +66,7 @@ const FIELD_LIMITS = {
   subtitle: { maxChars: 80, minChars: 25, targetChars: 80, required: true },
   lead: { maxChars: 500, minChars: 180, targetChars: 500, required: true },
   blockOne: { maxChars: 1300, minChars: 900, targetChars: 1300, required: true },
-  blockTwo: { maxChars: 1300, minChars: 900, targetChars: 1300, required: true },
+  blockTwo: { maxChars: 700, minChars: 500, targetChars: 700, required: true },
   debateCaption: { maxChars: 100, minChars: 12, required: false },
   quoteText: { maxChars: 220, minChars: 25, required: true },
   quoteSpeaker: { maxChars: 80, minChars: 3, required: true }
