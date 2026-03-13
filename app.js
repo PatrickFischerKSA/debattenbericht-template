@@ -60,6 +60,18 @@ const requiredFields = [
   "quoteSpeaker"
 ];
 
+const FIELD_LIMITS = {
+  authorNames: { maxChars: 100, minChars: 8, required: true },
+  title: { maxChars: 50, minChars: 12, required: true },
+  subtitle: { maxChars: 80, minChars: 25, targetChars: 80, required: true },
+  lead: { maxChars: 500, minChars: 180, targetChars: 500, required: true },
+  blockOne: { maxChars: 1300, minChars: 900, targetChars: 1300, required: true },
+  blockTwo: { maxChars: 1300, minChars: 900, targetChars: 1300, required: true },
+  debateCaption: { maxChars: 100, minChars: 12, required: false },
+  quoteText: { maxChars: 220, minChars: 25, required: true },
+  quoteSpeaker: { maxChars: 80, minChars: 3, required: true }
+};
+
 const languageToolConfig = window.DEBATTENBERICHT_CONFIG || {};
 const languageToolService =
   typeof window.LanguageToolService === "function"
@@ -608,7 +620,7 @@ function validateTextField(value, options = {}) {
 }
 
 function validateSubtitle(value) {
-  const result = validateTextField(value, { maxChars: 80, required: true, minChars: 25, targetChars: 80 });
+  const result = validateTextField(value, FIELD_LIMITS.subtitle);
   const lower = value.toLowerCase();
   const firstNames = getFirstNames();
   const themeKeywords = getThemeKeywords();
@@ -637,7 +649,7 @@ function validateSubtitle(value) {
 }
 
 function validateLead(value) {
-  const result = validateTextField(value, { maxChars: 500, required: true, minChars: 180, targetChars: 500 });
+  const result = validateTextField(value, FIELD_LIMITS.lead);
   const coverage = analyzeLead(value);
   const missing = Object.entries(coverage)
     .filter(([, present]) => !present)
@@ -655,41 +667,15 @@ function validateLead(value) {
 
 function validateAll() {
   const results = {};
-  results.authorNames = validateTextField(state.authorNames, {
-    maxChars: 100,
-    required: true,
-    minChars: 8
-  });
-  results.title = validateTextField(state.title, { maxChars: 50, required: true, minChars: 12 });
+  results.authorNames = validateTextField(state.authorNames, FIELD_LIMITS.authorNames);
+  results.title = validateTextField(state.title, FIELD_LIMITS.title);
   results.subtitle = validateSubtitle(state.subtitle);
   results.lead = validateLead(state.lead);
-  results.blockOne = validateTextField(state.blockOne, {
-    maxChars: 3000,
-    required: true,
-    minChars: 2200,
-    targetChars: 3000
-  });
-  results.blockTwo = validateTextField(state.blockTwo, {
-    maxChars: 3000,
-    required: true,
-    minChars: 2200,
-    targetChars: 3000
-  });
-  results.debateCaption = validateTextField(state.debateCaption, {
-    maxChars: 100,
-    required: false,
-    minChars: 12
-  });
-  results.quoteText = validateTextField(state.quoteText, {
-    maxChars: 220,
-    required: true,
-    minChars: 25
-  });
-  results.quoteSpeaker = validateTextField(state.quoteSpeaker, {
-    maxChars: 80,
-    required: true,
-    minChars: 3
-  });
+  results.blockOne = validateTextField(state.blockOne, FIELD_LIMITS.blockOne);
+  results.blockTwo = validateTextField(state.blockTwo, FIELD_LIMITS.blockTwo);
+  results.debateCaption = validateTextField(state.debateCaption, FIELD_LIMITS.debateCaption);
+  results.quoteText = validateTextField(state.quoteText, FIELD_LIMITS.quoteText);
+  results.quoteSpeaker = validateTextField(state.quoteSpeaker, FIELD_LIMITS.quoteSpeaker);
 
   Object.entries(results).forEach(([field, result]) => {
     const languageToolFeedback = getLanguageToolFeedback(field);
@@ -1127,7 +1113,7 @@ function buildDocx() {
   const isoDate = new Date().toISOString();
   const titleText = state.title || "Packender, zur Debatte passender Titel";
   const subtitleText = state.subtitle || "Untertitel mit Fragestellung und Vornamen der Debattierenden";
-  const leadText = state.lead || "Zugkraeftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.";
+  const leadText = state.lead || "Zugkräftiger Lead mit W-Fragen, Kontext und einer kurzen Bilanz der Debatte.";
   const quoteText = state.quoteText || "Knackiges Zitat aus der Debatte";
   const quoteSpeaker = state.quoteSpeaker || "Name Debattierende:r";
   const authorNames = state.authorNames || "Autor*innenteam";
@@ -1275,7 +1261,7 @@ function buildDocx() {
             spacingAfter: 34
           }) +
           createParagraphsFromText(state.blockOne, {
-            placeholder: "Bericht Teil 1: Einfuehrungsreden und freie Aussprache.",
+            placeholder: "Bericht Teil 1: Einführungsreden und freie Aussprache.",
             paragraph: { spacingAfter: 70, line: 250 },
             run: { font: "Georgia", fontSize: 16 }
           }),
@@ -1486,17 +1472,17 @@ function syncStateFromForm() {
 function fillSampleData() {
   const sample = {
     reportDate: "2026-02-21",
-    debateTheme: "Impfpflicht fuer Basisimpfungen",
+    debateTheme: "Impfpflicht für Basisimpfungen",
     debaterNames: "Leonie, Anne, Nicolas, Michelle",
-    authorNames: "Anne Krienbuehl, Leonie Moser",
-    title: "Impfpflicht fuer Basisimpfungen?",
+    authorNames: "Anne Krienbühl, Leonie Moser",
+    title: "Impfpflicht für Basisimpfungen?",
     subtitle: "Zur Impfpflicht debattieren Leonie, Anne, Nicolas und Michelle",
     lead:
-      "Wer an der Kantonsschule Ausserschwyz ueber eine Impfpflicht debattierte, stritt am Freitag in einer pointierten Runde ueber Freiheit, Schutz und Verantwortung. Die Debattierenden lieferten klare Linien, das Publikum fragte scharf nach, und am Ende blieb eine knappe Bilanz: Die Pflicht spaltet, zwingt aber zur konkreten Abwaegung.",
+      "Wer an der Kantonsschule Ausserschwyz über eine Impfpflicht debattierte, stritt am Freitag in einer pointierten Runde über Freiheit, Schutz und Verantwortung. Die Debattierenden lieferten klare Linien, das Publikum fragte scharf nach, und am Ende blieb eine knappe Bilanz: Die Pflicht spaltet, zwingt aber zur konkreten Abwägung.",
     blockOne:
-      "Zu Beginn setzten die Einfuehrungsreden den Ton der Debatte. Die Befuerworterseite rueckte den Schutz der Gesellschaft in den Mittelpunkt und verwies auf medizinische Risiken, die sich mit hohen Impfquoten begrenzen liessen. Die Gegenposition konterte frueh mit dem Hinweis auf die persoenliche Entscheidungsfreiheit und darauf, dass staatlicher Zwang in die koerperliche Selbstbestimmung eingreife.\n\nIn der freien Aussprache verdichteten sich diese Linien. Beide Seiten arbeiteten mit Beispielen aus dem Schulalltag, aus Spitaelern und aus der Frage, welche Verantwortung Einzelne gegenueber besonders gefaehrdeten Menschen tragen. Mehrfach wurde deutlich, dass die Kontroverse nicht an einzelnen Fakten hing, sondern an der Gewichtung von Sicherheit, Freiheit und Vertrauen in staatliche Eingriffe.\n\nBemerkenswert war, wie rasch sich die Debatte von Schlagworten loeste. Die Debattierenden praezisierten Begriffe, fragten nach Grenzen einer Pflicht und stellten wiederholt die Verhaeltnismaessigkeit ins Zentrum. Dadurch gewann der erste Teil an Schaerfe und blieb zugleich gut nachvollziehbar.",
+      "Zu Beginn setzten die Einführungsreden klare Linien. Die Befürworterseite rückte den Schutz besonders gefährdeter Menschen ins Zentrum und verband eine Impfpflicht mit Solidarität, Planbarkeit und der Entlastung des Gesundheitssystems. Die Gegenseite hielt dagegen, dass staatlicher Zwang tief in die persönliche Freiheit eingreife und Vertrauen eher zerstöre als stärke.\n\nIn der freien Aussprache wurde diese Spannung greifbar. Mehrfach fragten die Debattierenden nach Grenzen einer Pflicht, nach Ausnahmen und nach der Frage, wann Aufklärung nicht mehr genügt. Die stärksten Momente entstanden dort, wo beide Seiten konkrete Folgen beschrieben: Schutz für vulnerable Gruppen auf der einen, Eingriff in die Selbstbestimmung auf der anderen Seite.\n\nAuffällig war, wie sachlich der erste Teil trotz klarer Gegensätze blieb. Die Wortmeldungen bauten aufeinander auf, Begriffe wurden präzisiert, und die Debatte gewann an Schärfe, ohne ins Schlagwortartige abzugleiten.",
     blockTwo:
-      "Im zweiten Teil oeffnete sich die Debatte fuer das Publikum. Die Fragen zielten vor allem auf moegliche Alternativen zur Pflicht, auf Aufklaerungskampagnen und auf die Rolle von Schulen und Gesundheitseinrichtungen. Mehrere Wortmeldungen machten deutlich, dass ein bloss moralischer Appell vielen zu wenig weit geht, waehrend andere vor einer Eskalation durch Zwang warnten.\n\nDie Mentimeter-Resultate brachten eine nuancierte Zwischenbilanz. Zwar zeigte sich eine leichte Tendenz zugunsten staerkerer Massnahmen, doch das Bild blieb uneinheitlich. Genau diese Spannung praegte auch das Schlusssegment: Die Befuerwortenden argumentierten mit Praevention und Solidaritaet, die Gegenseite hielt an der individuellen Abwaegung fest.\n\nIm Schlusspunkt ueberzeugte vor allem, dass die Runde nicht bei Lagerdenken stehen blieb. Die Debatte endete offen, aber nicht beliebig: Sie zeigte, wie politisch aufgeladen das Thema bleibt und wie stark gute Argumente erst dann wirken, wenn sie konkret, aktiv und adressatenbezogen formuliert sind.",
+      "Im zweiten Teil öffnete sich die Debatte für das Publikum. Die Fragen drehten sich um Alternativen zur Pflicht, um Aufklärungskampagnen und um die Verantwortung von Schulen und Gesundheitseinrichtungen. Mehrere Beiträge machten deutlich, dass viele zwar mehr Schutz wollten, beim staatlichen Zwang aber zögerten.\n\nDie Mentimeter-Resultate sorgten für eine differenzierte Zwischenbilanz. Es zeigte sich keine klare Front, sondern ein Publikum, das Nutzen und Eingriff gleichzeitig abwog. Genau daraus zog die Schlussrunde ihre Spannung: Die Befürwortenden betonten Prävention und gesellschaftliche Verantwortung, die Gegenseite warnte vor Vertrauensverlust und pauschalen Eingriffen.\n\nZum Schluss blieb kein einfaches Ja oder Nein. Gerade das machte die Debatte stark: Sie zeigte, wie schnell ein gesundheitspolitisches Thema zur Grundsatzfrage über Freiheit, Schutz und Verhältnismässigkeit wird.",
     debateCaption: "Die Debatte an der KSA kreiste um Freiheit, Verantwortung und den Schutz vulnerabler Gruppen.",
     quoteText: "Anstatt die Leute zu zwingen, sollten wir Vertrauen schaffen.",
     quoteSpeaker: "Anne"
